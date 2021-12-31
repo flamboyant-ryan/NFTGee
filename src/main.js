@@ -7,7 +7,8 @@ import RPGeesAbi from "../contract/create.abi.json"
 
 const ERC20_DECIMALS = 18
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
-const RPGeesContractAddress = "0x3329Ddb492e5B10A94e5D5824b6b00a9463643B8"
+const RPGeesContractAddress = "0xBa50C0CC6DF0b8e99C8340EacF6a0675c7f2810c"
+
 let kit
 let contract
 let gees = []
@@ -57,9 +58,7 @@ const PHYSICAL = 0
   }
 
 const getRPGees = async function () {
-      console.log("whats going on")
       const _length = await contract.methods.getTotalTokenSupply().call()
-      console.log(_length)
       const _gees = []
   
       for (let i = 1; i <= _length; i++){
@@ -76,11 +75,9 @@ const getRPGees = async function () {
             owner: p[6] 
           })
         })
-        console.log(_gee)
         _gees.push(_gee)
       }
       gees = await Promise.all(_gees)
-      console.log("here boii rpgees")
       renderCharacters(gees)
   }
 
@@ -96,14 +93,11 @@ const getRPGees = async function () {
 
  
   function renderTemplate(gee) {
-    console.log(gee)   
   	return `
     <div class="card text-white bg-secondary mb-2"">
     <div class="card-header">${identiconTemplate(gee.owner, 16)}</div>
       <div class="card-body text-left p-4 position-relative">
-        <!-- <div class="translate-middle-y position-absolute top-0"> -->    
-        
-        <!-- </div> -->
+       
         <h5 class="card-title mx-3"> ${gee.name}</h5>
         <div class="d-flex flex-row">
         <span class="mx-3">
@@ -164,30 +158,21 @@ const getRPGees = async function () {
     let cost = await contract.methods.mint_price().call()
     cost = new BigNumber(cost).shiftedBy(-ERC20_DECIMALS)
     document.getElementById("mint_cost").innerHTML = `mint price: ${cost}`
-    console.log("we dey here")
     await getRPGees()
     notificationOff()
 	})
   
 
-
-
-// })
-  const delay = ms => new Promise(res => setTimeout(res, ms));
-
-// fight
   document.querySelector("#characters").addEventListener("click", async (e) => {
   
       const index = e.target.id
       let personal_nfts = gees.filter(g => g.owner == kit.defaultAccount && index != g.index)
-      console.log(personal_nfts)
 
       let inner = ""
     for (const g in personal_nfts) {
-        console.log(g)
       inner += `<option value="${personal_nfts[g].index}">${personal_nfts[g].name}</option>`
-      }
-      console.log(inner)
+    }
+      if (inner === "") document.getElementById("notice").text = "You cant challenge you own no personal characters"
       document.getElementById("choose").innerHTML = inner
       document.getElementById("choose").setAttribute("data-challenged", index)
 
@@ -224,24 +209,35 @@ const getRPGees = async function () {
 
   document.querySelector("#fightBtn").addEventListener("click", async (e) => {
     let select = document.getElementById("choose")
-
+    console.log("got in here")
 
     let challenged = select.dataset.challenged
-    let challenger = select.options[select.selectedIndex]
+    let challenger = select.options[select.selectedIndex].value
+
+    let c = parseInt(challenger)
     
+    let battleswon = gees[c-1].battles_won
+
+    console.log(challenged, challenger)
     let result;
     notification(`⌛ Battle if you dare`)
     try {
       const result = await contract.methods
-          .fight(challenger, challenged)
+          .fight(...[challenger, challenged])
           .send({from: kit.defaultAccount })
+
+          console.log(result)
+          getRPGees()
+
+          let response = battleswon == gees[challenger - 1].battles_won ? "lost": "won"
+          notification(`🎉Your character  ${gees[challenger - 1].name} ${response} the battle`)
+
+    
     }
     catch (error){
       notification(`⚠️ ${error}.`)
     }
-    console.log(result)
-    notification(`🎉 ${gees[result]} won the battle`)
-    getRPGees()
+    
   })
 
 

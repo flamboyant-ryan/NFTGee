@@ -22,9 +22,13 @@
 	/>
   <!-- <link rel="stylesheet" href="stylesheets/styles.css"/> -->
 		
-    <style>
+<style>
 :root {
 --bs-font-sans-serif: "DM Sans", sans-serif;
+}
+
+body{
+  background-color: grey;
 }
 
 
@@ -39,23 +43,20 @@
 	<title>RPG Homies</title>
 	</head>
 	<body>
-    <div class="container mt-2" style="max-width: 70em">
+    <div class="container mt-2 pt-3" style="max-width: 70em">
 
 
-	      <nav class="navbar bg-white navbar-light">
+	      <nav class="navbar bg-white navbar-light bg-transparent">
 	        <div class="container-fluid">
 	          <span class="navbar-brand m-0 h4 fw-bold">RPG Homies</span>
             
-            <span class="nav-link border rounded-pill bg-light">
+           
 	            <span id="mint_cost"></span>
-	          </span>
-	          <span class="nav-link border rounded-pill bg-light">
+	          <span class="nav-link">
 	            Balance: 
               <span id="balance">0</span>
 	            cUSD
 	          </span>
-            
-            
 	        </div>
 	      </nav>
       <div class="alert alert-warning sticky-top mt-2 alert-dismissible fade show" role="alert">
@@ -147,9 +148,8 @@
       <form>
         <div class="form-row">
           <div class="col">
-            hmm
             <div class="form-group">
-              <label for="exampleFormControlSelect1">choose your fighter</label>
+              <label id="notice" for="exampleFormControlSelect1">choose your fighter</label>
               <select class="form-control" id="choose">
                 <option>None</option>
                 
