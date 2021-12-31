@@ -5,7 +5,7 @@
 This is a simple NFT game Dapp where you can generate randomly created RPG character nfts. (It implements the ERC 721 standard and so can be listed and transferred like anyother nft)
 Traits are randomly assign to each new minted nft, some rare and others common
 
-You can also view other users characters and even clash with.
+You can also view other users characters and even clash with them.
 
 Each NFT has an effectiveness and battles won attribute, battles won keeps tracks of your clashes while effectiveness determines how likey it is for your own character to win a clash. The more significant the gap between you an another character's effectiveness, the more likely it is your character wins 
 

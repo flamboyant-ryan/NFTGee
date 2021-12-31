@@ -239,6 +239,7 @@ const getRPGees = async function () {
     catch (error){
       notification(`⚠️ ${error}.`)
     }
+    console.log(result)
     notification(`🎉 ${gees[result]} won the battle`)
     getRPGees()
   })
