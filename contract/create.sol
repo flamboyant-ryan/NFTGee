@@ -17,17 +17,159 @@ interface IERC20Token {
   event Transfer(address indexed from, address indexed to, uint256 value);
   event Approval(address indexed owner, address indexed spender, uint256 value);
 }
+library SafeMath {
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     *
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
 
+        return c;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     *
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction overflow");
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     *
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     *
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     *
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
+    }
+}
 
 contract RPGees is ERC721{
+    using SafeMath for uint;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
 
     address internal _owner;
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
-    uint offset = 1000000000000000000;
-    uint public mint_price = 2 * offset;
+    uint offset = 1 ether;
+    uint public mint_price = offset.mul(2);
     IERC20Token ERC = IERC20Token(cUsdTokenAddress);
 
     uint PHYSICAL = 0;
@@ -44,7 +186,7 @@ contract RPGees is ERC721{
     }
     mapping (uint => Character) internal characters;
     uint token_supply;
-    
+
     string[] physical_items = ["sword", "mace", "gauntlets", "war hammer"];
     string[] magic_items = ["staff", "orb", "wand" ,"book" ];
     string[] appends = [
@@ -229,24 +371,24 @@ contract RPGees is ERC721{
         );
     }
 
-  
+
     function tokenURI(uint256 token_id) override public view returns (string memory) {
-        
+
         Character storage char = characters[token_id];
-        string memory json = string(abi.encodePacked("{'name': '", char.name, "', 'battles won': '", char.battles_won, 
+        string memory json = string(abi.encodePacked("{'name': '", char.name, "', 'battles won': '", char.battles_won,
             "'effectiveness': '", char.effectiveness,  "', 'type': '", char._type == MAGIC ? "Magic type": "physical type",
             "'weapon': '", char.weapon, "'clothing': '", char.clothing,  "'}"));
         return string(abi.encodePacked("data:application/json,", json));
     }
 
     function fight(uint challenger_id, uint challenged_id) public returns (uint){
-        
+
         require(ownerOf(challenger_id) == msg.sender);
         require(challenger_id != challenged_id);
         uint totalodds = 100000000;
-        
+
         // halfway point of total odds space
-        uint fifty_fifty = totalodds / 2;
+        uint fifty_fifty = totalodds.div(2) ;
 
 
         // check for which character has effectiveness advantage
@@ -270,7 +412,7 @@ contract RPGees is ERC721{
             if ((_get_random(advantage) % totalodds) <  fifty_fifty + advantage){
                 winner = challenged_id;
             }else winner = challenger_id;
-        
+
         // increase the effectiveness of the winner by a random amount capped at 100
         characters[winner].effectiveness += _get_random(advantage) % 100;
         characters[winner].battles_won += 1;
