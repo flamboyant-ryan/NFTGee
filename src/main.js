@@ -3,18 +3,16 @@ import { newKitFromWeb3 } from "@celo/contractkit"
 import BigNumber from "bignumber.js"
 import erc20Abi from "../contract/erc20.abi.json"
 import RPGeesAbi from "../contract/create.abi.json"
+import {RPGeesContractAddress, ERC20_DECIMALS, cUSDContractAddress} from "./utils/constants";
 
 
-const ERC20_DECIMALS = 18
-const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
-const RPGeesContractAddress = "0xBa50C0CC6DF0b8e99C8340EacF6a0675c7f2810c"
 
 let kit
 let contract
 let gees = []
 
 const MAGIC = 1
-const PHYSICAL = 0
+// const PHYSICAL = 0
 
   const connectCeloWallet = async function (){
     if (window.celo) {
@@ -42,19 +40,19 @@ const PHYSICAL = 0
 
     async function approve(_price){
       const cUSDContract = new kit.web3.eth.Contract(erc20Abi, cUSDContractAddress)
-    
-      const result = await cUSDContract.methods
+
+      return await cUSDContract.methods
             .approve(RPGeesContractAddress, _price)
             .send({ from: kit.defaultAccount })
-        return result
+
     }
   
 
 
   const getBalance = async function() {
     const totalBalance = await kit.getTotalBalance(kit.defaultAccount)
-    const cUSDBalance = totalBalance.cUSD.shiftedBy(-ERC20_DECIMALS).toFixed(2)
-  	document.querySelector("#balance").textContent = cUSDBalance
+    cdocument.querySelector("#balance").textContent  = totalBalance.cUSD.shiftedBy(-ERC20_DECIMALS).toFixed(2)
+
   }
 
 const getRPGees = async function () {
@@ -62,7 +60,7 @@ const getRPGees = async function () {
       const _gees = []
   
       for (let i = 1; i <= _length; i++){
-        let _gee = new Promise(async (resolve, reject) => {
+        let _gee = new Promise(async (resolve) => {
           let p = await contract.methods.getCharDetails(i).call()
           resolve({
             index: i,
@@ -120,7 +118,7 @@ const getRPGees = async function () {
     </div>
   `
 }
-  function identiconTemplate(_address, size=48) {
+  function identiconTemplate(_address) {
     const icon = blockies
     .create({
       seed: _address,
@@ -178,7 +176,7 @@ const getRPGees = async function () {
 
  })
 
-  document.querySelector("#mintBtn").addEventListener("click", async (e) => {
+  document.querySelector("#mintBtn").addEventListener("click", async () => {
     let name = document.getElementById("char_name").value
     
     const cost = await contract.methods.mint_price().call()
@@ -196,7 +194,7 @@ const getRPGees = async function () {
 
     notification(`⌛ Please add another zero to the max gas price estimate, or else your minting might fail`)
     try {
-      const result = await contract.methods
+     await contract.methods
           .mint_character(name)
           .send({from: kit.defaultAccount })
     }
@@ -207,9 +205,9 @@ const getRPGees = async function () {
     getRPGees()
   })
 
-  document.querySelector("#fightBtn").addEventListener("click", async (e) => {
+  document.querySelector("#fightBtn").addEventListener("click", async () => {
     let select = document.getElementById("choose")
-    console.log("got in here")
+
 
     let challenged = select.dataset.challenged
     let challenger = select.options[select.selectedIndex].value
@@ -218,15 +216,12 @@ const getRPGees = async function () {
     
     let battleswon = gees[c-1].battles_won
 
-    console.log(challenged, challenger)
-    let result;
     notification(`⌛ Battle if you dare`)
     try {
-      const result = await contract.methods
+      await contract.methods
           .fight(...[challenger, challenged])
           .send({from: kit.defaultAccount })
 
-          console.log(result)
           getRPGees()
 
           let response = battleswon == gees[challenger - 1].battles_won ? "lost": "won"
